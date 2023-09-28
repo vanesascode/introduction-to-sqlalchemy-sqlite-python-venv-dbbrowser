@@ -210,7 +210,7 @@ CREATE TABLE comments (
 2023-09-28 13:33:47,470 INFO sqlalchemy.engine.Engine COMMIT
 ```
 
-## DB BROWSER
+## 🔹DB BROWSER
 
 We can see our database created in a program called [DB Browser](https://sqlitebrowser.org/)
 
@@ -218,7 +218,7 @@ We can see our database created in a program called [DB Browser](https://sqliteb
 
 You'll see there the tables and the columns of each.
 
-## INSERT STATEMENTS
+## 🔹Insert Statements
 
 Create a new file called `inserting.py` and import the `insert` function and the table you want to modify:
 
@@ -296,7 +296,7 @@ with engine.connect() as conn:
 2023-09-28 14:23:54,795 INFO sqlalchemy.engine.Engine COMMIT
 ```
 
-## Retrieve Data/ Select Statements
+## 🔹Retrieve Data/ Select Statements
 
 Create the file `selecting.py` and import what we need:
 
@@ -370,7 +370,7 @@ FROM users
 
 The `f`-string is used to dynamically insert the values of row.name and row.fullname into the string. The curly braces `{}` are used to enclose the expressions that will be evaluated and replaced with their corresponding values.
 
-## Selecting with conditions:
+## 🔹Selecting with conditions:
 
 To add a condition to the search, we have to use the .where clause next to the selection:
 
@@ -387,7 +387,7 @@ with engine.connect() as conn:
 
 `c` is an attribute of the table object that represents the column of the table.
 
-## Update data
+## 🔹Update data
 
 Create a new file `updating.py` and import all as always (and the function `update`).
 
@@ -424,7 +424,7 @@ And in the console you'll see you changed the value:
 2023-09-28 14:55:48,420 INFO sqlalchemy.engine.Engine COMMIT
 ```
 
-## Delete data
+## 🔹Delete data
 
 So let's go ahead an create a file for this too, so it's all organized: `deleting.py`. And the same:
 
