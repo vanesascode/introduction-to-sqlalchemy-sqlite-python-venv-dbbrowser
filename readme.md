@@ -1,8 +1,12 @@
 # Introduction to SQLAlchemy Core and Python
 
-QLAlchemy Core allows you to interact with `relational databases` using statements written in pure Python. This allows you to form queries and use your database without that much knowledge of SQL.
+SQLAlchemy is a Python library that provides a set of tools for interacting with databases. It offers two main components: the SQLAlchemy Core and the SQLAlchemy ORM.
 
-Let's see how to connect to an SQL database as well as to Create, Read, Update, and Delete records from your database.
+🔸 SQLAlchemy `Core` is a lower-level interface that allows you to work with `SQL directly`.
+
+🔸 SQLAlchemy `ORM` is a higher-level interface that allows you to work with databases using `Python objects`.
+
+The choice between the two depends on your specific requirements and preferences.
 
 ## 🔹Create a virtual environment in Python.
 
@@ -88,6 +92,12 @@ You should see sqlalchemy working:
 ```
 
 You'll also see a new file created: `sample.db`
+
+# 🌟SQLAlchemy CORE🌟
+
+The SQLAlchemy Core is a lower-level interface that allows you to interact with databases using `SQL expressions` directly. It provides a set of classes and functions that represent database tables, columns, and other SQL constructs.
+
+With the Core, you have more control over the SQL statements being executed and can write complex queries directly.
 
 ## 🔹Define database tables
 
@@ -445,4 +455,329 @@ with engine.connect() as conn:
 2023-09-28 15:01:40,651 INFO sqlalchemy.engine.Engine DELETE FROM users WHERE users.name = ?
 2023-09-28 15:01:40,651 INFO sqlalchemy.engine.Engine [generated in 0.00096s] ('Chusta',)
 2023-09-28 15:01:40,660 INFO sqlalchemy.engine.Engine COMMIT
+```
+
+# 🌟SQLAlchemy ORM🌟
+
+The SQLAlchemy ORM (Object-Relational Mapping) is a higher-level interface that allows you to interact with databases using Python objects.
+
+It provides a way to define classes that represent database tables and relationships between them.
+
+The ORM handles the translation between Python objects and database records, allowing you to work with databases `using object-oriented programming techniques`.
+
+## 🔹Database Models:
+
+Database models are `representations` of database tables and the relationships between them. In the context of SQLAlchemy, database models are typically defined `using the SQLAlchemy ORM` (Object-Relational Mapping).
+
+A database model is typically represented as a Python class that inherits from a `base class` provided by SQLAlchemy. Each attribute of the class represents a column in the corresponding database table, and the class itself represents the table.
+
+By defining database models, you can `interact with the database using Python objects and methods`, rather than writing raw SQL queries. The ORM handles the translation between Python objects and database records, allowing you to work with databases `using object-oriented programming techniques`.
+
+Database models provide a high-level, intuitive way to interact with databases and simplify the process of working with data. They allow you to define the structure of your database tables, specify relationships between tables, and perform `CRUD (Create, Read, Update, Delete)` operations on the data.
+
+Overall, database models are a powerful tool for working with databases in an object-oriented manner, providing a higher level of abstraction and making it easier to manage and manipulate data.
+
+## 🔹Declarative Base Class
+
+The declarative base class in SQLAlchemy is a class provided by the SQLAlchemy ORM that `simplifies the process of defining database models`. It allows you to define your models using a declarative syntax, where you define the structure of your tables as classes.
+
+Create a file called `models.py` and import it:
+
+```
+from sqlalchemy.orm import DeclarativeBase
+```
+
+And define it:
+
+```
+class Base(DeclarativeBase):
+  pass
+```
+
+This serves as the declarative base class for all database models you define below.
+
+## 🔹Defining models:
+
+```
+class User(Base):
+    __tablename__ = 'users'
+    id:Mapped[int] = mapped_column(primary_key=True)
+    username:Mapped[str] = mapped_column(nullable=False)
+    email_address:Mapped[str]
+    comments:Mapped[List["Comment"]] = relationship(back_populates='user')
+
+    def __repr__(self) -> str:
+        return f"<User username={self.username}>"
+
+
+class Comment(Base):
+    __tablename__ = 'comments'
+    id:Mapped[int] = mapped_column(primary_key=True)
+    user_id:Mapped[int] = mapped_column(ForeignKey('users.id'),nullable=False)
+    text:Mapped[str] = mapped_column(Text,nullable=False)
+    user:Mapped["User"] =relationship(back_populates='comments')
+
+    def __repr__(self):
+        return f"<Comment text={self.text} by {self.user.username}>"
+```
+
+The User class has attributes such as id, username, email_address, and comments. The comments attribute is defined as a relationship with the Comment model, indicating a `one-to-many` relationship between User and Comment.
+
+The Comment class has attributes such as id, user_id, text, and user. The user attribute is defined as a relationship back to the User model, indicating a `many-to-one` relationship between Comment and User.
+
+The columns are defined using the `Mapped` and `mapped_column` functions.
+
+The comments attribute of the User class is mapped to a relationship with the Comment class. This relationship is defined using the `relationship  function` with the `back_populates parameter` set to 'user'.
+
+This back_populates parameter is used to establish `bidirectional relationships` between two mapped classes. It specifies the attribute on the related class that should be used to navigate from the related class back to the original class.
+
+The `__repr__()` method in both classes overrides the default representation of the objects, providing a custom string representation when printing instances of the classes.
+
+👉 The **repr**() method is a special method in Python classes that defines how an object should be represented as a string. It is commonly used to provide a human-readable string representation of the object for debugging or informational purposes.
+
+In the use class, the method is defined with the signature `def __repr__(self) -> str` . This indicates that the method takes no arguments ( `self` refers to the instance of the class itself) and returns a string.
+
+The `-> str` annotation after the method signature def **repr**(self) indicates the expected return type of the method. However, in Python, not specifying a return type does not restrict the actual return value of the method. The **repr**() method can still return a string, and it is a common convention for the **repr**() method to return a string representation of an object.
+
+Inside the method, the line `return f"<User username={self.username}>"` constructs a string using an f-string, which is a way to embed expressions inside string literals.
+
+## 🔹Create Database Tables based on the model definitions.
+
+So after defining our database models we're going to be able to `create objects` and then will use an object oriented approach to save them to our database.
+
+Create `create_tables.py` file:
+
+```
+from models import Base
+from connect import engine
+
+print(">>>CREATE TABLES>>>>")
+Base.metadata.create_all(bind=engine)
+```
+
+We define a metadata object and then attach all the database tables created onto that metadata object. Then you bind it to an engine for it to be able to create your database tables in the database.
+
+Before running this file, change the name of the database in the connect file:
+
+```
+engine = create_engine('sqlite:///sample2.db', echo=True)
+```
+
+Then, run it (remember to activate env) and you see this in the console:
+
+```
+>>>CREATE TABLES>>>>
+2023-09-29 11:26:35,255 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-09-29 11:26:35,255 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("users")
+2023-09-29 11:26:35,256 INFO sqlalchemy.engine.Engine [raw sql] ()
+2023-09-29 11:26:35,257 INFO sqlalchemy.engine.Engine PRAGMA temp.table_info("users")
+2023-09-29 11:26:35,257 INFO sqlalchemy.engine.Engine [raw sql] ()
+2023-09-29 11:26:35,258 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("comments")
+2023-09-29 11:26:35,258 INFO sqlalchemy.engine.Engine [raw sql] ()
+2023-09-29 11:26:35,259 INFO sqlalchemy.engine.Engine PRAGMA temp.table_info("comments")
+2023-09-29 11:26:35,260 INFO sqlalchemy.engine.Engine [raw sql] ()
+2023-09-29 11:26:35,261 INFO sqlalchemy.engine.Engine
+CREATE TABLE users (
+        id INTEGER NOT NULL,
+        username VARCHAR NOT NULL,
+        email_address VARCHAR NOT NULL,
+        PRIMARY KEY (id)
+)
+
+
+2023-09-29 11:26:35,262 INFO sqlalchemy.engine.Engine [no key 0.00150s] ()
+2023-09-29 11:26:35,268 INFO sqlalchemy.engine.Engine
+CREATE TABLE comments (
+        id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        text TEXT NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY(user_id) REFERENCES users (id)
+)
+
+
+2023-09-29 11:26:35,269 INFO sqlalchemy.engine.Engine [no key 0.00139s] ()
+2023-09-29 11:26:35,274 INFO sqlalchemy.engine.Engine COMMIT
+```
+
+Notice that there are several INFO messages related to querying the SQLite database to gather information about the existing tables. These messages are part of SQLAlchemy's internal process to check the current state of the database.
+
+After that, there are two CREATE TABLE statements, in SQL SYNTAX. Finally, there is an INFO message indicating the end of the transaction: COMMIT. This indicates that the transaction for creating the tables has been committed successfully.
+
+## 🔹Create and persist objects:
+
+`Persisting objects` refers to the process of saving or storing objects in a persistent storage medium, such as a database or a file system, so that they can be retrieved and used later.
+
+In the context of SQLAlchemy's ORM, persisting objects typically involves creating instances of your defined models (e.g., User or Comment objects) and then adding them to a session. The `session` acts as a transactional boundary and tracks changes made to the objects.
+
+👉 When using ORM `you don't have to know the details of the SQL that's required` for you to do things such as inserting. All you have to do is to create objects of the model classes that you created and then you use a `session object` to go ahead and persist them to the database.
+
+1. First we create some model objects in our file `persisting.py`:
+
+```
+from models import User, Comment
+
+Pelusa = User(
+  username='Pelusita',
+  email_address = 'pelusa@me.com',
+  comments = [
+    Comment(
+      text = 'This is a comment',
+    ),
+    Comment(
+      text = 'This is another comment',
+    )
+  ]
+)
+
+Dante = User(
+  username='Dantete',
+  email_address = 'Dante@me.com',
+  comments = [
+    Comment(
+      text = 'This is a meow',
+    )
+  ]
+)
+
+Nemo = User(
+  username='Nemito',
+  email_address = 'nemo@me.com',
+)
+
+```
+
+2. Then we insert them into our database:
+
+- We import the session and connect it to the database:
+
+```
+from sqlalchemy.orm import Session
+from connect import engine
+
+session = Session(bind=engine)
+```
+
+- Then we add our model objects and we commit:
+
+```
+session.add_all([Pelusa, Dante, Nemo])
+session.commit()
+
+
+```
+
+- Then we run the code of the file and see the console it is all corrected inserted (you can also see in the DB BROWSER)
+
+```
+2023-09-29 12:02:56,911 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-09-29 12:02:56,914 INFO sqlalchemy.engine.Engine INSERT INTO users (username, email_address) VALUES (?, ?) RETURNING id
+2023-09-29 12:02:56,915 INFO sqlalchemy.engine.Engine [generated in 0.00009s (insertmanyvalues) 1/3 (ordered; batch not supported)] ('Pelusita', 'pelusa@me.com')
+2023-09-29 12:02:56,917 INFO sqlalchemy.engine.Engine INSERT INTO users (username, email_address) VALUES (?, ?) RETURNING id
+2023-09-29 12:02:56,918 INFO sqlalchemy.engine.Engine [insertmanyvalues 2/3 (ordered; batch not supported)] ('Dantete', 'Dante@me.com')
+2023-09-29 12:02:56,918 INFO sqlalchemy.engine.Engine INSERT INTO users (username, email_address) VALUES (?, ?) RETURNING id
+2023-09-29 12:02:56,919 INFO sqlalchemy.engine.Engine [insertmanyvalues 3/3 (ordered; batch not supported)] ('Nemito', 'nemo@me.com')
+2023-09-29 12:02:56,921 INFO sqlalchemy.engine.Engine INSERT INTO comments (user_id, text) VALUES (?, ?) RETURNING id
+2023-09-29 12:02:56,921 INFO sqlalchemy.engine.Engine [generated in 0.00010s (insertmanyvalues) 1/3 (ordered; batch not supported)] (1, 'This is a comment')
+2023-09-29 12:02:56,921 INFO sqlalchemy.engine.Engine INSERT INTO comments (user_id, text) VALUES (?, ?) RETURNING id
+2023-09-29 12:02:56,922 INFO sqlalchemy.engine.Engine [insertmanyvalues 2/3 (ordered; batch not supported)] (1, 'This
+is another comment')
+2023-09-29 12:02:56,922 INFO sqlalchemy.engine.Engine INSERT INTO comments (user_id, text) VALUES (?, ?) RETURNING id
+2023-09-29 12:02:56,922 INFO sqlalchemy.engine.Engine [insertmanyvalues 3/3 (ordered; batch not supported)] (2, 'This
+is a meow')
+2023-09-29 12:02:56,923 INFO sqlalchemy.engine.Engine COMMIT
+
+```
+
+## 🔹Select Statements:
+
+First let's have the session in another file, to avoid repetition of data.
+
+Create `main.py` and just leave this there:
+
+```
+from sqlalchemy.orm import Session
+from connect import engine
+
+
+session = Session(bind=engine)
+
+```
+
+In the `persisting.py` file we import from main:
+
+```
+from models import User, Comment
+from main import session
+```
+
+Then, we create the file `selecting_orm.py` and import all we need:
+
+```
+from main import session
+from models import User
+from sqlalchemy import select
+```
+
+And create the statement with the session object:
+
+```
+users = session.query(User).all()
+```
+
+And execute the statement :
+
+```
+for user in users:
+    print(user)
+```
+
+So in the console:
+
+```
+2023-09-29 12:55:14,987 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-09-29 12:55:14,989 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.username AS users_username, users.email_address AS users_email_address
+FROM users
+2023-09-29 12:55:14,990 INFO sqlalchemy.engine.Engine [generated in 0.00087s] ()
+<User username=Pelusita>
+<User username=Dantete>
+<User username=Nemito>
+```
+
+See more examples of queries in the `selecting_orm.py`.
+
+## 🔹execute() vs scalars():
+
+The execute() method in SQLAlchemy is used to execute a SQL statement or a constructed SQL expression directly on the database. It returns a `ResultProxy` object, which provides access to the rows and columns returned by the executed statement.
+
+On the other hand, the scalars() method is a convenience method provided by SQLAlchemy that can be used to execute a statement and `retrieve only the first column of the result` set as a scalar value. It is particularly useful when you know the result set will contain only a single column.
+
+## 🔹Updating Statements:
+
+We also need the session object to update data:
+
+```
+comment = session.query(Comment).filter_by(id = 1).first()
+
+comment.text = "This is an updated comment again"
+
+session.commit()
+```
+
+This line is the same:
+
+```
+comment = session.query(Comment).filter(Comment.id == 1).first()
+```
+
+## 🔹Deleting Statements:
+
+First be sure of what you are going to delete! It's worth to print it first:
+
+```
+comment = session.query(Comment).filter(Comment.id == 1).first()
+print(comment)
+
+session.delete(comment)
+session.commit()
 ```

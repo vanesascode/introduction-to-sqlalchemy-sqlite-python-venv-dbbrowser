@@ -1,3 +1,5 @@
+# CORE
+
 from sqlalchemy import delete
 from tables import users_table
 from connect import engine

@@ -1,3 +1,5 @@
+# CORE + ORM
+
 ### TO SEE VERSION: 
 
 # import sqlalchemy
@@ -7,7 +9,9 @@
 
 from sqlalchemy import create_engine, text
 
-engine = create_engine('sqlite:///sample.db', echo=True)
+### CONNECTION TO THE DATABASE: 
+
+engine = create_engine('sqlite:///sample2.db', echo=True)
 
 ### TEST: 
 

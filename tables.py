@@ -1,3 +1,5 @@
+# CORE
+
 from sqlalchemy import Table, MetaData, Column
 from sqlalchemy import Integer, String, Text, ForeignKey
 

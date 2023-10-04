@@ -1,3 +1,5 @@
+# CORE
+
 from sqlalchemy import insert
 from tables import users_table
 from connect import engine
